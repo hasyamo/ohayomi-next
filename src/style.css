@@ -539,3 +539,17 @@ body {
 .data-actions .btn {
   flex: 1;
 }
+
+/* --- Footer --- */
+
+.footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--outline);
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.footer-link {
+  color: var(--outline);
+  text-decoration: underline;
+}

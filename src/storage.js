@@ -120,6 +120,21 @@ export function reorderCreators(orderedIds) {
   saveCreators(creators)
 }
 
+export function deleteCreator(id) {
+  const creators = getCreators().filter((c) => c.id !== id)
+  saveCreators(creators)
+
+  // dailyStatus からも片付ける
+  const daily = getDailyStatus()
+  if (daily.items && daily.items[id]) {
+    delete daily.items[id]
+  }
+  if (Array.isArray(daily.expandIds)) {
+    daily.expandIds = daily.expandIds.filter((x) => x !== id)
+  }
+  saveDailyStatus(daily)
+}
+
 // --- Level ---
 
 export { LEVELS, ROTATION_DAYS }
@@ -234,13 +249,47 @@ export function checkAndResetIfNeeded() {
 
 export function resetAllStatus() {
   const creators = getActiveCreators()
+  // 今日のひろがり枠を確定する（lv1以外で、今日のローテーション対象）
+  const now = new Date()
+  const expandIds = creators
+    .filter((c) => c.level !== LEVELS.LV1 && isInTodayRotation(c, now))
+    .map((c) => c.id)
+
   const daily = {
-    dateKey: new Date().toISOString().slice(0, 10),
+    dateKey: now.toISOString().slice(0, 10),
     items: {},
+    expandIds,
   }
   creators.forEach((c) => {
     daily.items[c.id] = { read: false, commented: false, updatedAt: null }
   })
+  saveDailyStatus(daily)
+}
+
+// 今日のひろがり枠に入っているか
+// - 朝5時のリセット時に expandIds がスナップショットされる
+// - 一度でもこの関数が true を返した相手は今日の枠に追加（加算のみ、減算なし）
+export function isInTodayExpand(creatorId) {
+  const daily = getDailyStatus()
+  if (!Array.isArray(daily.expandIds)) return false
+  return daily.expandIds.includes(creatorId)
+}
+
+// 今日のひろがり枠を再計算して、必要なら追加する（加算のみ）
+// 日中はチェックのON/OFFや訪問によって枠から消えないことを保証する
+export function refreshTodayExpand() {
+  const daily = getDailyStatus()
+  if (!Array.isArray(daily.expandIds)) daily.expandIds = []
+  const now = new Date()
+  const creators = getActiveCreators()
+  const items = daily.items || {}
+  const set = new Set(daily.expandIds)
+  creators.forEach((c) => {
+    if (c.level === LEVELS.LV1) return
+    const eligible = isInTodayRotation(c, now) || (items[c.id] && (items[c.id].read || items[c.id].commented))
+    if (eligible) set.add(c.id)
+  })
+  daily.expandIds = Array.from(set)
   saveDailyStatus(daily)
 }
 

@@ -59,7 +59,7 @@
         <p class="section-empty" id="lv1Empty" hidden>コミュニティはまだ登録されていません。カードを長押しすると、頻度を変更できます。</p>
       </section>
 
-      <!-- Expand (lv2/lv3) Section -->
+      <!-- Expand (lv2/lv3 今日のローテ) Section -->
       <section class="section" id="expandSection">
         <h2 class="section-title">
           <span class="section-title-label">ひろがり</span>
@@ -67,6 +67,16 @@
         </h2>
         <div class="grid" id="expandGrid"></div>
         <p class="section-empty" id="expandEmpty" hidden>今日のローテーションに入っている人はいません。</p>
+      </section>
+
+      <!-- Slow (lv2/lv3 ローテ外) Section -->
+      <section class="section" id="slowSection">
+        <h2 class="section-title">
+          <span class="section-title-label">ゆっくり</span>
+          <span class="section-title-meta" id="slowMeta"></span>
+        </h2>
+        <div class="grid" id="slowGrid"></div>
+        <p class="section-empty" id="slowEmpty" hidden>該当する人はいません。</p>
       </section>
 
       <!-- Empty state (no creators at all) -->
@@ -198,6 +208,20 @@
           <button class="btn btn-secondary" id="exportBtn">エクスポート</button>
           <button class="btn btn-secondary" id="importBtn">インポート</button>
           <input type="file" id="importFile" accept=".json" hidden />
+        </div>
+        <div id="debugPanel" hidden>
+          <h3 class="modal-subtitle">デバッグ</h3>
+          <div class="data-actions">
+            <button class="btn btn-secondary" data-shift-days="1">+1日</button>
+            <button class="btn btn-secondary" data-shift-days="7">+7日</button>
+            <button class="btn btn-secondary" data-shift-days="30">+30日</button>
+          </div>
+          <div class="data-actions" style="margin-top: 8px;">
+            <button class="btn btn-secondary" data-shift-days="-1">-1日</button>
+            <button class="btn btn-secondary" data-shift-days="-7">-7日</button>
+            <button class="btn btn-secondary" data-shift-days="-30">-30日</button>
+          </div>
+          <p class="debug-note">+ は時計を進めた扱い（訪問日を過去にずらす）、- は逆方向（戻す）です。</p>
         </div>
         <div class="modal-actions">
           <button class="btn btn-secondary" id="settingsCloseBtn">閉じる</button>

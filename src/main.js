@@ -5,11 +5,14 @@ import {
   getArchivedCreators,
   addCreator,
   updateCreator,
+  deleteCreator,
   setCreatorLevel,
   getCreatorStatus,
   setCreatorStatus,
   markVisit,
   isInTodayRotation,
+  isInTodayExpand,
+  refreshTodayExpand,
   newArticleCount,
   checkAndResetIfNeeded,
   resetAllStatus,
@@ -55,6 +58,9 @@ const lv1Meta = $('lv1Meta')
 const expandGrid = $('expandGrid')
 const expandEmpty = $('expandEmpty')
 const expandMeta = $('expandMeta')
+const slowGrid = $('slowGrid')
+const slowEmpty = $('slowEmpty')
+const slowMeta = $('slowMeta')
 const emptyState = $('emptyState')
 
 let currentStatusId = null
@@ -93,6 +99,7 @@ function render() {
     naviEl.hidden = true
     $('lv1Section').hidden = true
     $('expandSection').hidden = true
+    $('slowSection').hidden = true
     emptyState.hidden = false
     return
   }
@@ -102,38 +109,34 @@ function render() {
   emptyState.hidden = true
   $('lv1Section').hidden = false
   $('expandSection').hidden = false
+  $('slowSection').hidden = false
 
-  const lv1 = creators.filter((c) => c.level === LEVELS.LV1)
-  const expand = creators.filter((c) => c.level !== LEVELS.LV1 && isInTodayRotation(c))
+  // ひろがり枠の加算（今日の周期入り or チェック済みは消さない）
+  refreshTodayExpand()
 
-  // lv1: sort by: new-first, then remaining by order
-  const lv1Sorted = [...lv1].sort((a, b) => {
-    const an = newArticleCount(a) > 0 ? 0 : 1
-    const bn = newArticleCount(b) > 0 ? 0 : 1
-    if (an !== bn) return an - bn
-    return a.order - b.order
-  })
+  const byOrder = (a, b) => a.order - b.order
+  const lv1 = creators.filter((c) => c.level === LEVELS.LV1).sort(byOrder)
+  const expand = creators
+    .filter((c) => c.level !== LEVELS.LV1 && isInTodayExpand(c.id))
+    .sort(byOrder)
+  const slow = creators
+    .filter((c) => c.level !== LEVELS.LV1 && !isInTodayExpand(c.id))
+    .sort(byOrder)
 
-  // expand: new-first, then last-visited-oldest-first
-  const expandSorted = [...expand].sort((a, b) => {
-    const an = newArticleCount(a) > 0 ? 0 : 1
-    const bn = newArticleCount(b) > 0 ? 0 : 1
-    if (an !== bn) return an - bn
-    const av = a.lastVisitedAt ? new Date(a.lastVisitedAt).getTime() : 0
-    const bv = b.lastVisitedAt ? new Date(b.lastVisitedAt).getTime() : 0
-    return av - bv
-  })
+  renderGrid(lv1Grid, lv1)
+  lv1Empty.hidden = lv1.length > 0
+  lv1Meta.textContent = metaText(lv1)
 
-  renderGrid(lv1Grid, lv1Sorted)
-  lv1Empty.hidden = lv1Sorted.length > 0
-  lv1Meta.textContent = metaText(lv1Sorted)
+  renderGrid(expandGrid, expand)
+  expandEmpty.hidden = expand.length > 0
+  expandMeta.textContent = metaText(expand)
 
-  renderGrid(expandGrid, expandSorted)
-  expandEmpty.hidden = expandSorted.length > 0
-  expandMeta.textContent = metaText(expandSorted)
+  renderGrid(slowGrid, slow)
+  slowEmpty.hidden = slow.length > 0
+  slowMeta.textContent = metaText(slow)
 
-  renderNavi(creators, lv1Sorted, expandSorted)
-  maybeShowReward(lv1Sorted)
+  renderNavi(creators, lv1, expand)
+  maybeShowReward(lv1)
 }
 
 function metaText(list) {
@@ -173,23 +176,21 @@ function buildCard(creator) {
     <button class="status-toggle ${s.commented ? 'status-toggle--on' : ''}" data-toggle="commented" aria-pressed="${s.commented}">コメント</button>
   `
 
-  const metaParts = []
-  if (creator.level === LEVELS.LV1) metaParts.push('毎日')
-  else if (creator.level === LEVELS.LV2) metaParts.push('週単位')
-  else if (creator.level === LEVELS.LV3) metaParts.push('月単位')
+  const levelLabelClass = creator.level === LEVELS.LV1 ? 'card-level--lv1'
+    : creator.level === LEVELS.LV2 ? 'card-level--lv2'
+    : 'card-level--lv3'
+  const levelLabel = creator.level === LEVELS.LV1 ? '毎日'
+    : creator.level === LEVELS.LV2 ? '週単位'
+    : '月単位'
   const dv = daysSinceVisit(creator)
-  if (dv !== null) {
-    metaParts.push(dv === 0 ? '今日' : `${dv}日前`)
-  } else {
-    metaParts.push('未訪問')
-  }
+  const visitLabel = dv === null ? '未訪問' : dv === 0 ? '今日' : `${dv}日前`
 
-  const headerStyle = creator.headerImageUrl
-    ? `style="background-image: url('${encodeURI(creator.headerImageUrl)}')"`
-    : ''
+  const headerBg = creator.headerImageUrl
+    ? `<div class="card-header-bg" style="background-image: url('${encodeURI(creator.headerImageUrl)}')"></div>`
+    : `<div class="card-header-bg card-header-bg--empty"><span>No Image</span></div>`
 
   card.innerHTML = `
-    <div class="card-header-bg" ${headerStyle}></div>
+    ${headerBg}
     <div class="card-body">
       <div class="card-icon">${
         creator.iconUrl
@@ -198,17 +199,100 @@ function buildCard(creator) {
       }</div>
       <div class="card-main">
         <div class="card-name">${escapeHtml(creator.name)}</div>
-        <div class="card-meta">${metaParts.join(' · ')}</div>
+        <div class="card-meta"><span class="card-level ${levelLabelClass}">${levelLabel}</span><span class="card-visit"> · ${visitLabel}</span></div>
       </div>
       <div class="card-right">
         ${badgeNew}
         <div class="status-toggles">${toggles}</div>
       </div>
+      <button class="drag-handle" aria-label="並び替え" title="ドラッグで並び替え">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <line x1="3" y1="4" x2="11" y2="4"/>
+          <line x1="3" y1="7" x2="11" y2="7"/>
+          <line x1="3" y1="10" x2="11" y2="10"/>
+        </svg>
+      </button>
     </div>
   `
 
   attachCardEvents(card, creator)
+  attachDragEvents(card, creator)
   return card
+}
+
+// --- Drag & Drop ---
+
+let dragState = null
+
+function attachDragEvents(card, creator) {
+  const handle = card.querySelector('.drag-handle')
+  if (!handle) return
+  handle.setAttribute('draggable', 'true')
+  card.dataset.creatorId = creator.id
+
+  handle.addEventListener('dragstart', (e) => {
+    dragState = { creatorId: creator.id, sourceCard: card }
+    card.classList.add('card--dragging')
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', creator.id)
+    if (e.dataTransfer.setDragImage) {
+      e.dataTransfer.setDragImage(card, 20, 20)
+    }
+  })
+
+  handle.addEventListener('dragend', () => {
+    card.classList.remove('card--dragging')
+    document.querySelectorAll('.card--drop-before, .card--drop-after').forEach((el) => {
+      el.classList.remove('card--drop-before', 'card--drop-after')
+    })
+    dragState = null
+  })
+
+  card.addEventListener('dragover', (e) => {
+    if (!dragState) return
+    if (dragState.creatorId === creator.id) return
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    const rect = card.getBoundingClientRect()
+    const before = e.clientY < rect.top + rect.height / 2
+    card.classList.toggle('card--drop-before', before)
+    card.classList.toggle('card--drop-after', !before)
+  })
+
+  card.addEventListener('dragleave', () => {
+    card.classList.remove('card--drop-before', 'card--drop-after')
+  })
+
+  card.addEventListener('drop', (e) => {
+    if (!dragState) return
+    e.preventDefault()
+    const rect = card.getBoundingClientRect()
+    const before = e.clientY < rect.top + rect.height / 2
+    card.classList.remove('card--drop-before', 'card--drop-after')
+    reorderByDrop(dragState.creatorId, creator.id, before)
+  })
+}
+
+function reorderByDrop(sourceId, targetId, before) {
+  if (sourceId === targetId) return
+  const creators = getActiveCreators()
+  const source = creators.find((c) => c.id === sourceId)
+  const target = creators.find((c) => c.id === targetId)
+  if (!source || !target) return
+
+  // Rebuild order: remove source, then insert at target's position (before/after)
+  const others = creators.filter((c) => c.id !== sourceId)
+  const targetIdx = others.findIndex((c) => c.id === targetId)
+  const insertIdx = before ? targetIdx : targetIdx + 1
+  others.splice(insertIdx, 0, source)
+
+  // Re-assign order 1..N
+  const orderedIds = others.map((c) => c.id)
+  // reorderCreators も使えるが、archived も含めて order を振り直すために updateCreator を使う
+  orderedIds.forEach((id, i) => {
+    updateCreator(id, { order: i + 1 })
+  })
+  render()
 }
 
 function attachCardEvents(card, creator) {
@@ -217,6 +301,7 @@ function attachCardEvents(card, creator) {
 
   const startPress = (e) => {
     if (e.target.closest('.status-toggle')) return
+    if (e.target.closest('.drag-handle')) return
     longPressed = false
     pressTimer = setTimeout(() => {
       longPressed = true
@@ -247,6 +332,7 @@ function attachCardEvents(card, creator) {
 
   card.addEventListener('click', (e) => {
     if (e.target.closest('.status-toggle')) return
+    if (e.target.closest('.drag-handle')) return
     if (longPressed) {
       e.preventDefault()
       e.stopPropagation()
@@ -257,6 +343,7 @@ function attachCardEvents(card, creator) {
 
   card.addEventListener('contextmenu', (e) => {
     if (e.target.closest('.status-toggle')) return
+    if (e.target.closest('.drag-handle')) return
     e.preventDefault()
     openActionMenu(creator)
   })
@@ -677,8 +764,11 @@ function renderArchivedList() {
     .map(
       (c) => `
     <div class="archived-item">
-      <span>${escapeHtml(c.name)}</span>
-      <button class="btn btn-primary" data-restore="${c.id}">復帰</button>
+      <span class="archived-name">${escapeHtml(c.name)}</span>
+      <div class="archived-actions">
+        <button class="btn btn-secondary" data-restore="${c.id}">復帰</button>
+        <button class="btn btn-danger" data-delete="${c.id}">削除</button>
+      </div>
     </div>
   `
     )
@@ -687,6 +777,18 @@ function renderArchivedList() {
   archivedList.querySelectorAll('[data-restore]').forEach((btn) => {
     btn.addEventListener('click', () => {
       updateCreator(btn.dataset.restore, { archived: false })
+      renderArchivedList()
+      render()
+    })
+  })
+
+  archivedList.querySelectorAll('[data-delete]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.delete
+      const creator = getArchivedCreators().find((c) => c.id === id)
+      if (!creator) return
+      if (!confirm(`「${creator.name}」を完全に削除しますか？この操作は取り消せません。`)) return
+      deleteCreator(id)
       renderArchivedList()
       render()
     })
@@ -717,6 +819,53 @@ async function refreshAllCreators() {
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register(import.meta.env.BASE_URL + 'sw.js')
+}
+
+// --- Debug ---
+
+function isDebugMode() {
+  return new URLSearchParams(window.location.search).has('debug')
+}
+
+function shiftTimeBackward(days) {
+  // days > 0: 時計を進めた扱い（既存データを過去へ）
+  // days < 0: 時計を戻す扱い（既存データを未来へ）
+  const ms = days * 24 * 60 * 60 * 1000
+  const creators = JSON.parse(localStorage.getItem('ohayomi_creators') || '[]')
+  creators.forEach((c) => {
+    if (c.lastVisitedAt) {
+      c.lastVisitedAt = new Date(new Date(c.lastVisitedAt).getTime() - ms).toISOString()
+    }
+    if (c.lastApiCheckedAt) {
+      c.lastApiCheckedAt = new Date(new Date(c.lastApiCheckedAt).getTime() - ms).toISOString()
+    }
+  })
+  localStorage.setItem('ohayomi_creators', JSON.stringify(creators))
+
+  // lastResetAt も過去にずらす（+方向の時は次回 render で自動リセットが走るように過去に寄せる）
+  if (days > 0) {
+    // 進める方向: 最後のリセットを十分過去に置いて、checkAndResetIfNeeded でリセットを走らせる
+    localStorage.removeItem('ohayomi_lastResetAt')
+  } else {
+    // 戻す方向: lastResetAt は触らない（今日のままでOK）
+  }
+
+  // dailyStatus は完全にクリア（read/commented/expandIds すべて）
+  localStorage.removeItem('ohayomi_dailyStatus')
+  localStorage.removeItem('ohayomi_rewardShownAt')
+}
+
+if (isDebugMode()) {
+  const panel = $('debugPanel')
+  if (panel) panel.hidden = false
+  document.querySelectorAll('[data-shift-days]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const days = parseInt(btn.dataset.shiftDays, 10)
+      shiftTimeBackward(days)
+      checkAndResetIfNeeded()
+      render()
+    })
+  })
 }
 
 // --- Init ---

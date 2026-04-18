@@ -164,7 +164,10 @@ function buildCard(creator) {
   const nCount = newArticleCount(creator)
 
   const card = document.createElement('div')
-  card.className = 'card' + (done ? ' card--done' : '')
+  const hasNew = nCount > 0
+  card.className = 'card'
+    + (done ? ' card--done' : '')
+    + (!done && !hasNew ? ' card--quiet' : '')
   card.dataset.creatorId = creator.id
 
   const badgeNew = nCount > 0
@@ -395,16 +398,21 @@ function renderNavi(all, lv1, expand) {
     return s.read || s.commented
   }).length
 
+  const lv1InProgress = lv1All > 0 && lv1Done > 0 && lv1Done < lv1All
+
   let key
   if (lv1All === 0 && expand.length === 0) key = 'nothing'
   else if (lv1All > 0 && lv1Done === lv1All && expandNew === 0) key = 'all_done'
+  else if (lv1InProgress) key = 'lv1_progress'
   else if (lv1New > 0) key = 'lv1_new'
   else if (lv1All > 0 && lv1Done === lv1All) key = 'lv1_done'
   else if (expandNew > 0) key = 'expand_only'
   else key = 'lv1_no_new'
 
-  const template = dict[key] || dict.lv1_no_new || ''
-  const text = fillTemplate(template, { lv1New, expandNew })
+  const templateRaw = dict[key] || dict.lv1_no_new || ''
+  const template = pickOne(templateRaw)
+  const lv1Remaining = lv1All - lv1Done
+  const text = fillTemplate(template, { lv1New, expandNew, lv1Done, lv1All, lv1Remaining })
 
   $('naviImage').src = assetPath(char.eyes)
   $('naviName').textContent = char.name
@@ -414,6 +422,11 @@ function renderNavi(all, lv1, expand) {
 
 function fillTemplate(tpl, vars) {
   return tpl.replace(/\$\{(\w+)\}/g, (_, k) => (vars[k] !== undefined ? String(vars[k]) : ''))
+}
+
+function pickOne(v) {
+  if (Array.isArray(v)) return v[Math.floor(Math.random() * v.length)] || ''
+  return v || ''
 }
 
 // --- Reward modal ---

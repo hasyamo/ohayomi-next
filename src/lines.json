@@ -1,0 +1,127 @@
+{
+  "characters": {
+    "mon": {
+      "name": "月子",
+      "eyes": "/characters/eyes/eyes-mon.webp",
+      "chibi": "/characters/chibi/chibi-mon.png"
+    },
+    "tue": {
+      "name": "陽",
+      "eyes": "/characters/eyes/eyes-tue.webp",
+      "chibi": "/characters/chibi/chibi-tue.png"
+    },
+    "wed": {
+      "name": "しずく",
+      "eyes": "/characters/eyes/eyes-wed.webp",
+      "chibi": "/characters/chibi/chibi-wed.png"
+    },
+    "thu": {
+      "name": "凛華",
+      "eyes": "/characters/eyes/eyes-thu.webp",
+      "chibi": "/characters/chibi/chibi-thu.png"
+    },
+    "fri": {
+      "name": "るな",
+      "eyes": "/characters/eyes/eyes-fri.webp",
+      "chibi": "/characters/chibi/chibi-fri.png"
+    },
+    "sat": {
+      "name": "まひる",
+      "eyes": "/characters/eyes/eyes-sat.webp",
+      "chibi": "/characters/chibi/chibi-sat.png"
+    },
+    "sun": {
+      "name": "日和",
+      "eyes": "/characters/eyes/eyes-sun.webp",
+      "chibi": "/characters/chibi/chibi-sun.png"
+    }
+  },
+  "navi": {
+    "mon": {
+      "lv1_new": "コミュニティに${lv1New}件、新着があります。順にいきましょう。",
+      "lv1_done": "コミュニティは全員確認済み。ひろがりも見ておきましょう。",
+      "lv1_no_new": "コミュニティに新着はないですね。過去記事を拾ってもいいかも。",
+      "expand_only": "ひろがりに${expandNew}件。淡々と。",
+      "all_done": "今日の分は終わり。記録は大事よ。",
+      "nothing": "今日はおやすみの日。また明日。"
+    },
+    "tue": {
+      "lv1_new": "コミュニティに${lv1New}件きてるよ！早く会いにいこ！",
+      "lv1_done": "コミュニティ終わった！ひろがりもチェックしよ！",
+      "lv1_no_new": "コミュニティは静かだね。過去記事でもめくってみる？",
+      "expand_only": "ひろがりで${expandNew}件あるよ！のぞいてみよ！",
+      "all_done": "全部読んだ！今日もえらい！",
+      "nothing": "今日は誰もいないっぽい。まぁ、そんな日もあるよね！"
+    },
+    "wed": {
+      "lv1_new": "コミュニティに${lv1New}件。ゆっくり見ていこうね。",
+      "lv1_done": "コミュニティはおしまい。ひろがりも、少しだけ。",
+      "lv1_no_new": "今日のコミュニティは静かみたい。それもいいよね。",
+      "expand_only": "ひろがりに${expandNew}件。気になる人から。",
+      "all_done": "ぜんぶ読めたね。ちょっと休も。",
+      "nothing": "今日はなにもない日。そういう日もあるよ。"
+    },
+    "thu": {
+      "lv1_new": "……コミュニティに${lv1New}件。見に行きなさいよ。",
+      "lv1_done": "コミュニティは終わり。……コメントは、した？",
+      "lv1_no_new": "コミュニティは新着なし。別に、さぼっていいわけじゃないけど。",
+      "expand_only": "ひろがりに${expandNew}件。……ちゃんと見なさいよ。",
+      "all_done": "ぜんぶ終わったの。……まあ、悪くないんじゃない。",
+      "nothing": "今日は何もない日ね。……それも、たまには。"
+    },
+    "fri": {
+      "lv1_new": "コミュニティに${lv1New}件！はやく会いに行こー！",
+      "lv1_done": "コミュニティおわったー！ひろがりも行っちゃお！",
+      "lv1_no_new": "コミュニティは静かだね〜。過去記事探検いこ？",
+      "expand_only": "ひろがりに${expandNew}件あるよ！楽しみ〜！",
+      "all_done": "全員コンプリートー！えらすぎ！",
+      "nothing": "今日はお休みっぽい！週末ぢから、温存だ！"
+    },
+    "sat": {
+      "lv1_new": "コミュニティ、${lv1New}件あるよ。ゆっくりでいいから。",
+      "lv1_done": "コミュニティおわり〜。ひろがりはお好みで。",
+      "lv1_no_new": "コミュニティ、今日は静かだね。のんびりしよ。",
+      "expand_only": "ひろがりに${expandNew}件。気になるのだけでいいよ。",
+      "all_done": "ぜんぶ読めたね。お疲れさま。",
+      "nothing": "今日はおやすみの日。それでいいよ。"
+    },
+    "sun": {
+      "lv1_new": "コミュニティに${lv1New}件。今週もみんな、がんばってたね。",
+      "lv1_done": "コミュニティはおしまい。ひろがりも、少しだけのぞいてみる？",
+      "lv1_no_new": "コミュニティは静かだね。過去記事を読み返すのも、いいと思う。",
+      "expand_only": "ひろがりに${expandNew}件。急がなくて、いいからね。",
+      "all_done": "今週もおつかれさま。ゆっくり休んでね。",
+      "nothing": "今日は何もない日。ちゃんと休めるね。"
+    }
+  },
+  "reward": {
+    "mon": [
+      "コミュニティ、全員確認済み。……今週も、きちんと。",
+      "完了ね。記録はしておくわよ。"
+    ],
+    "tue": [
+      "コミュニティぜんぶクリア！今日のあなた、えらい！",
+      "よっしゃー！全員会えた！やったね！"
+    ],
+    "wed": [
+      "ぜんぶ、会えたね。ちょっと休も。",
+      "おつかれさま。よくがんばったね。"
+    ],
+    "thu": [
+      "……コミュニティぜんぶ終わったの。べ、別にえらいなんて思ってないけど。",
+      "やればできるじゃない。……明日もね。"
+    ],
+    "fri": [
+      "コミュニティコンプリート！！えらすぎぃ！！",
+      "全員会えた〜！今日のあなた最高！"
+    ],
+    "sat": [
+      "ぜんぶ会えたね〜。のんびりいこ。",
+      "おつかれさま。ゆっくりしていいよ。"
+    ],
+    "sun": [
+      "今週も、ちゃんと会えたね。おつかれさま。",
+      "コミュニティのみんな、しっかり見守れたね。えらいよ。"
+    ]
+  }
+}

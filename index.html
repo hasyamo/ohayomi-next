@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#00b86b" />
+    <meta name="theme-color" content="#0a0a0a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="おはヨミ" />
@@ -11,37 +11,69 @@
     <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <meta property="og:title" content="おはヨミ" />
-    <meta property="og:description" content="お気に入りのnoteクリエイターの朝活記事を、朝のうちにチェック＆コメントする習慣をつくるPWA" />
+    <meta property="og:description" content="推しクリエイターの記事を、読みに行く習慣をつくるPWA" />
     <meta property="og:image" content="https://hasyamo.github.io/ohayomi/icons/icon-512.png" />
     <meta property="og:url" content="https://hasyamo.github.io/ohayomi/" />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="おはヨミ" />
-    <meta name="twitter:description" content="お気に入りのnoteクリエイターの朝活記事を、朝のうちにチェック＆コメントする習慣をつくるPWA" />
+    <meta name="twitter:description" content="推しクリエイターの記事を、読みに行く習慣をつくるPWA" />
     <meta name="twitter:image" content="https://hasyamo.github.io/ohayomi/icons/icon-512.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
     <title>おはヨミ</title>
   </head>
   <body>
     <div id="app">
       <!-- Header -->
       <header class="header">
-        <h1 class="header-title">おはヨミ</h1>
-        <p class="header-subtitle" id="progressText">今日の朝活</p>
-        <button class="header-settings-btn" id="settingsBtn" aria-label="設定">
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1m17.07-7.07l-4.24 4.24m-4.24 4.24L5.93 17.07m12.14 0l-4.24-4.24m-4.24-4.24L5.93 5.93"></path>
-          </svg>
-        </button>
+        <div class="header-title-row">
+          <h1 class="header-title">おはヨミ</h1>
+          <div class="header-actions">
+            <a href="/manual.html" class="header-link">使い方</a>
+            <button class="header-settings-btn" id="settingsBtn" aria-label="設定">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
       </header>
 
-      <!-- Checklist -->
-      <main class="checklist" id="checklist">
-        <div class="empty-state" id="emptyState">
-          <p>クリエイターが登録されていません</p>
-          <p>右下の＋ボタンから追加しましょう</p>
+      <!-- Navi (character dialogue) -->
+      <section class="navi" id="navi" hidden>
+        <div class="navi-char">
+          <img id="naviImage" class="navi-image" alt="" />
+          <span id="naviName" class="navi-name"></span>
         </div>
-      </main>
+        <p id="naviLine" class="navi-line"></p>
+      </section>
+
+      <!-- lv1 Section -->
+      <section class="section" id="lv1Section">
+        <h2 class="section-title">
+          <span class="section-title-label">コミュニティ</span>
+          <span class="section-title-meta" id="lv1Meta"></span>
+        </h2>
+        <div class="grid" id="lv1Grid"></div>
+        <p class="section-empty" id="lv1Empty" hidden>コミュニティはまだ登録されていません。カードを長押しすると、頻度を変更できます。</p>
+      </section>
+
+      <!-- Expand (lv2/lv3) Section -->
+      <section class="section" id="expandSection">
+        <h2 class="section-title">
+          <span class="section-title-label">ひろがり</span>
+          <span class="section-title-meta" id="expandMeta"></span>
+        </h2>
+        <div class="grid" id="expandGrid"></div>
+        <p class="section-empty" id="expandEmpty" hidden>今日のローテーションに入っている人はいません。</p>
+      </section>
+
+      <!-- Empty state (no creators at all) -->
+      <section class="empty-state" id="emptyState" hidden>
+        <p>クリエイターが登録されていません</p>
+        <p>右下の＋ボタンから追加しましょう</p>
+      </section>
 
       <!-- FAB -->
       <button class="fab" id="addBtn" aria-label="クリエイター追加">＋</button>
@@ -65,7 +97,7 @@
         />
         <p class="modal-error" id="urlError"></p>
         <div class="modal-preview" id="registerPreview" hidden>
-          <p>ユーザー名: <strong id="previewUsername"></strong></p>
+          <div class="register-preview-creator" id="previewCreator"></div>
           <label class="modal-label" for="displayNameInput">表示名</label>
           <input type="text" id="displayNameInput" class="modal-input" />
         </div>
@@ -97,17 +129,59 @@
       </div>
     </div>
 
-    <!-- Edit Modal -->
-    <div class="modal-overlay modal-overlay--top" id="editModal">
-      <div class="modal modal--top">
-        <h2 class="modal-title" id="editTitle">クリエイター編集</h2>
-        <label class="modal-label" for="editNameInput">表示名</label>
-        <input type="text" id="editNameInput" class="modal-input" />
+    <!-- Level / Action Menu Modal (long-press) -->
+    <div class="modal-overlay" id="actionMenuModal">
+      <div class="modal">
+        <div class="modal-creator-info" id="actionMenuCreatorInfo"></div>
+        <div class="modal-actions-vertical">
+          <button class="action-btn" data-level="lv1">
+            <span class="action-btn-label">毎日</span>
+            <span class="action-btn-desc">毎日会いに行く</span>
+          </button>
+          <button class="action-btn" data-level="lv2">
+            <span class="action-btn-label">週単位</span>
+            <span class="action-btn-desc">週ごとにローテーション</span>
+          </button>
+          <button class="action-btn" data-level="lv3">
+            <span class="action-btn-label">月単位</span>
+            <span class="action-btn-desc">月ごとにローテーション</span>
+          </button>
+          <button class="action-btn" id="actionRenameBtn">
+            <span class="action-btn-label">名前を変更</span>
+            <span class="action-btn-desc">表示名を編集</span>
+          </button>
+          <button class="action-btn action-btn--danger" id="actionArchiveBtn">
+            <span class="action-btn-label">アーカイブ</span>
+            <span class="action-btn-desc">一時的に非表示</span>
+          </button>
+        </div>
         <div class="modal-actions">
-          <button class="btn btn-danger" id="editArchiveBtn">アーカイブ</button>
-          <div class="spacer"></div>
-          <button class="btn btn-secondary" id="editCancelBtn">キャンセル</button>
-          <button class="btn btn-primary" id="editSaveBtn">保存</button>
+          <button class="btn btn-secondary" id="actionMenuCloseBtn">閉じる</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div class="modal-overlay modal-overlay--top" id="renameModal">
+      <div class="modal modal--top">
+        <h2 class="modal-title">名前を変更</h2>
+        <label class="modal-label" for="renameInput">表示名</label>
+        <input type="text" id="renameInput" class="modal-input" />
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="renameCancelBtn">キャンセル</button>
+          <button class="btn btn-primary" id="renameSaveBtn">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reward Modal (all lv1 checked) -->
+    <div class="modal-overlay" id="rewardModal">
+      <div class="modal modal--reward">
+        <img id="rewardImage" class="reward-image" alt="" />
+        <div id="rewardName" class="reward-name"></div>
+        <p id="rewardLine" class="reward-line"></p>
+        <div class="modal-actions">
+          <button class="btn btn-primary btn-full" id="rewardCloseBtn">閉じる</button>
         </div>
       </div>
     </div>
@@ -117,8 +191,6 @@
       <div class="modal">
         <h2 class="modal-title">設定</h2>
         <button class="btn btn-secondary btn-full" id="resetBtn">ステータスをリセット</button>
-        <h3 class="modal-subtitle">並び順</h3>
-        <div id="orderList" class="order-list"></div>
         <h3 class="modal-subtitle">アーカイブ済み</h3>
         <div id="archivedList" class="archived-list"></div>
         <h3 class="modal-subtitle">データ管理</h3>

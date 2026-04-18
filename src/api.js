@@ -16,6 +16,8 @@ export async function fetchCreator(username) {
   return {
     nickname: json.data.nickname,
     profileImageUrl: json.data.profileImageUrl,
+    headerImageUrl: json.data.headerImageUrl || null,
     noteCount: json.data.noteCount,
+    followerCount: json.data.followerCount ?? null,
   }
 }

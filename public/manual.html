@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<title>使い方 - おはヨミ</title>
+<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-alt: #f4f4f5;
+  --border: #e5e5e5;
+  --border-strong: #d4d4d4;
+  --ink: #0a0a0a;
+  --ink-muted: #525252;
+  --ink-subtle: #737373;
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif;
+  line-height: 1.8;
+  padding: 24px 16px 48px;
+  max-width: 640px;
+  margin: 0 auto;
+  -webkit-font-smoothing: antialiased;
+}
+h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: center;
+  color: var(--ink);
+}
+.sub {
+  font-size: 13px;
+  color: var(--ink-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 2px;
+  margin-bottom: 24px;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+h2 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 12px;
+}
+p {
+  font-size: 14px;
+  color: var(--ink-muted);
+  margin-bottom: 10px;
+}
+p:last-child { margin-bottom: 0; }
+ul {
+  list-style: none;
+  margin-bottom: 10px;
+}
+ul li {
+  font-size: 13px;
+  color: var(--ink-muted);
+  padding: 4px 0;
+  padding-left: 1.2em;
+  position: relative;
+}
+ul li::before {
+  content: "─";
+  position: absolute;
+  left: 0;
+  color: var(--ink-subtle);
+}
+.label {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  font-size: 11px;
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 4px;
+  margin-right: 4px;
+  letter-spacing: 0.02em;
+}
+.label-daily { background: var(--ink); color: #fff; }
+.label-weekly { background: var(--border-strong); color: var(--ink); }
+.label-monthly { color: var(--ink-subtle); padding-left: 0; padding-right: 0; }
+.label-new { background: var(--ink); color: #fff; }
+.back {
+  display: block;
+  margin: 24px 0 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: var(--ink-muted);
+  text-decoration: none;
+  letter-spacing: 0.03em;
+}
+.back:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+.navi {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  background: var(--ink);
+  color: #fff;
+  padding: 14px;
+  border-radius: var(--radius);
+}
+.navi-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid #fff;
+  background: var(--surface-alt);
+  object-fit: cover;
+}
+.navi-body { flex: 1; min-width: 0; }
+.navi-name {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  opacity: 0.7;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+.navi-line {
+  font-size: 14px;
+  line-height: 1.7;
+}
+.tip {
+  font-size: 12px;
+  color: var(--ink-subtle);
+  margin-top: 8px;
+}
+</style>
+</head>
+<body>
+
+<a class="back" href="./">← 戻る</a>
+
+<h1>おはヨミ</h1>
+<p class="sub">使い方</p>
+
+<div class="section">
+  <h2>このツールについて</h2>
+  <div class="navi">
+    <img class="navi-img" src="./characters/eyes/eyes-sun.webp" alt="日和">
+    <div class="navi-body">
+      <div class="navi-name">日和</div>
+      <div class="navi-line">推しクリエイターの記事を、読みに行くためのツールだよ。noteのお気に入りクリエイターを登録して、毎日どの人に会いに行くかを整理できるの。<br>「毎日必ず会いたい人」と「たまに覗きたい人」を分けて管理することで、朝の限られた時間でもコミュニティを大切に保てるよ。</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>3つの頻度</h2>
+  <div class="navi">
+    <img class="navi-img" src="./characters/eyes/eyes-mon.webp" alt="月子">
+    <div class="navi-body">
+      <div class="navi-name">月子</div>
+      <div class="navi-line">登録したクリエイターは、会いに行く頻度で3つに分類できるわ。カードを長押し（右クリック）すれば、いつでも変更できるから。</div>
+    </div>
+  </div>
+  <ul>
+    <li><span class="label label-daily">毎日</span>メンバーシップメンバーや仲良しなど、毎日必ず会いに行きたい相手</li>
+    <li><span class="label label-weekly">週単位</span>週ごとにローテーションで会いに行く相手</li>
+    <li><span class="label label-monthly">月単位</span>月ごとにローテーションで会いに行く相手</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2>3つのセクション</h2>
+  <div class="navi">
+    <img class="navi-img" src="./characters/eyes/eyes-wed.webp" alt="しずく">
+    <div class="navi-body">
+      <div class="navi-name">しずく</div>
+      <div class="navi-line">画面は3つのセクションに分かれてるよ。毎朝5時に、ひろがりとゆっくりのリストが切り替わるの。</div>
+    </div>
+  </div>
+  <ul>
+    <li><strong>コミュニティ</strong>：毎日の相手。全員が常に表示されます。</li>
+    <li><strong>ひろがり</strong>：週単位・月単位のうち、今日のローテーションに入った相手。</li>
+    <li><strong>ゆっくり</strong>：週単位・月単位のうち、今日のローテーションに入っていない相手。気が向いた時に読みに行けます。</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2>カードの操作</h2>
+  <div class="navi">
+    <img class="navi-img" src="./characters/eyes/eyes-tue.webp" alt="陽">
+    <div class="navi-body">
+      <div class="navi-name">陽</div>
+      <div class="navi-line">カードの操作はいろいろできるよ！タップ・長押し・ドラッグ、それぞれ使い分けてね！</div>
+    </div>
+  </div>
+  <ul>
+    <li><strong>タップ</strong>：noteのクリエイターページを開きます。戻ってくると「読了／コメント」の記録モーダルが出ます。</li>
+    <li><strong>読了 / コメント</strong>：カード内のボタンで直接記録できます。</li>
+    <li><strong>長押し（右クリック）</strong>：頻度変更・名前変更・アーカイブのメニューが開きます。</li>
+    <li><strong>ドラッグハンドル</strong>：右端の「≡」アイコンを掴んで、並び順を変えられます。</li>
+  </ul>
+</div>
+
+<div class="section">
+  <h2>新着の表示</h2>
+  <div class="navi">
+    <img class="navi-img" src="./characters/eyes/eyes-thu.webp" alt="凛華">
+    <div class="navi-body">
+      <div class="navi-name">凛華</div>
+      <div class="navi-line">……前回の訪問から新しい記事が投稿されてると <span style="background:#fff;color:#0a0a0a;padding:1px 6px;border-radius:4px;font-size:11px;">新着</span> が付くから。見逃さないでね。</div>
+    </div>
+  </div>
+  <p>複数件ある時は件数も表示します。新着のないカードは少し薄く表示され、チェック済みのカードはさらに薄くグレースケール化されます。今日会うべき相手がひと目で分かります。</p>
+</div>
+
+<div class="section">
+  <h2>今日の声かけ</h2>
+  <div class="navi">
+    <img class="navi-img" src="./characters/eyes/eyes-fri.webp" alt="るな">
+    <div class="navi-body">
+      <div class="navi-name">るな</div>
+      <div class="navi-line">画面の上には、その曜日の担当がいるよ！月曜は月子、火曜はわたしじゃなくて陽、水曜はしずく、木曜は凛華、金曜が私るな！土曜はまひる、日曜は日和！<br>コミュニティを全員確認できた日は、そっとご褒美もあるからね！</div>
+    </div>
+  </div>
+  <p class="tip">曜日担当のキャラクターは「おはようカノジョ」のメンバーです。</p>
+</div>
+
+<div class="section">
+  <h2>データの扱い</h2>
+  <div class="navi">
+    <img class="navi-img" src="./characters/eyes/eyes-sat.webp" alt="まひる">
+    <div class="navi-body">
+      <div class="navi-name">まひる</div>
+      <div class="navi-line">登録情報も読了記録も、ぜんぶあなたのブラウザの中に保存されるよ。サーバーには送ってないから安心して。<br>端末を変えるときは、設定画面からエクスポートして、新しい端末でインポートしてね。</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>注意</h2>
+  <p>note公式のAPIではなく、公開プロフィール情報を取得しています。note側の仕様変更により、動作が不安定になる可能性があります。</p>
+  <p>読了・コメントの記録は個人の運用ログとしてご利用ください。</p>
+</div>
+
+<a class="back" href="./">← 戻る</a>
+
+</body>
+</html>

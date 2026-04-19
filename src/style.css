@@ -663,6 +663,26 @@ body {
   border-color: var(--ink);
 }
 
+.modal-textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  outline: none;
+  transition: border-color 0.12s;
+  background: var(--surface);
+  color: var(--ink);
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.modal-textarea:focus {
+  border-color: var(--ink);
+}
+
 .modal-error {
   color: var(--danger);
   font-size: 12px;

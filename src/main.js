@@ -735,35 +735,62 @@ $('resetBtn').addEventListener('click', () => {
   closeModal(settingsModal)
 })
 
+const exportModal = $('exportModal')
+const importModal = $('importModal')
+const exportText = $('exportText')
+const importText = $('importText')
+const importError = $('importError')
+
 $('exportBtn').addEventListener('click', () => {
-  const json = exportData()
-  const blob = new Blob([json], { type: 'application/json' })
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
-  a.download = 'ohayomi-next-backup.json'
-  a.click()
-  URL.revokeObjectURL(a.href)
+  exportText.value = exportData()
+  closeModal(settingsModal)
+  openModal(exportModal)
+  setTimeout(() => {
+    exportText.focus()
+    exportText.select()
+  }, 100)
 })
 
-const importFile = $('importFile')
-$('importBtn').addEventListener('click', () => importFile.click())
-importFile.addEventListener('change', (e) => {
-  const file = e.target.files[0]
-  if (!file) return
-  const reader = new FileReader()
-  reader.onload = () => {
-    try {
-      importData(reader.result)
-      render()
-      closeModal(settingsModal)
-      refreshAllCreators()
-    } catch {
-      alert('ファイルの読み込みに失敗しました')
-    }
+$('exportCopyBtn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(exportText.value)
+    $('exportCopyBtn').textContent = 'コピーしました'
+    setTimeout(() => { $('exportCopyBtn').textContent = 'コピー' }, 1500)
+  } catch {
+    exportText.select()
+    document.execCommand('copy')
+    $('exportCopyBtn').textContent = 'コピーしました'
+    setTimeout(() => { $('exportCopyBtn').textContent = 'コピー' }, 1500)
   }
-  reader.readAsText(file)
-  importFile.value = ''
 })
+
+$('exportCloseBtn').addEventListener('click', () => closeModal(exportModal))
+
+$('importBtn').addEventListener('click', () => {
+  importText.value = ''
+  importError.textContent = ''
+  closeModal(settingsModal)
+  openModal(importModal)
+  setTimeout(() => importText.focus(), 100)
+})
+
+$('importConfirmBtn').addEventListener('click', () => {
+  const json = importText.value.trim()
+  if (!json) {
+    importError.textContent = 'テキストを貼り付けてください'
+    return
+  }
+  try {
+    importData(json)
+    render()
+    closeModal(importModal)
+    refreshAllCreators()
+  } catch {
+    importError.textContent = '読み込みに失敗しました。正しい形式のテキストを貼り付けてください。'
+  }
+})
+
+$('importCancelBtn').addEventListener('click', () => closeModal(importModal))
 
 function renderArchivedList() {
   const archived = getArchivedCreators()

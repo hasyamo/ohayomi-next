@@ -210,7 +210,6 @@
         <div class="data-actions">
           <button class="btn btn-secondary" id="exportBtn">エクスポート</button>
           <button class="btn btn-secondary" id="importBtn">インポート</button>
-          <input type="file" id="importFile" accept=".json" hidden />
         </div>
         <div id="debugPanel" hidden>
           <h3 class="modal-subtitle">デバッグ</h3>
@@ -228,6 +227,33 @@
         </div>
         <div class="modal-actions">
           <button class="btn btn-secondary" id="settingsCloseBtn">閉じる</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div class="modal-overlay" id="exportModal">
+      <div class="modal">
+        <h2 class="modal-title">エクスポート</h2>
+        <p class="modal-label">下のテキストをコピーして、別の端末でインポートしてください。</p>
+        <textarea id="exportText" class="modal-textarea" readonly></textarea>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="exportCloseBtn">閉じる</button>
+          <button class="btn btn-primary" id="exportCopyBtn">コピー</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal-overlay" id="importModal">
+      <div class="modal">
+        <h2 class="modal-title">インポート</h2>
+        <p class="modal-label">エクスポートしたテキストを貼り付けてください。現在のデータは上書きされます。おはヨミv1のエクスポートテキストもそのまま使えます。</p>
+        <textarea id="importText" class="modal-textarea" placeholder="ここに貼り付け"></textarea>
+        <p class="modal-error" id="importError"></p>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="importCancelBtn">キャンセル</button>
+          <button class="btn btn-primary" id="importConfirmBtn">読み込む</button>
         </div>
       </div>
     </div>

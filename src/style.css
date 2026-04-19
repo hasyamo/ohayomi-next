@@ -683,6 +683,35 @@ body {
   border-color: var(--ink);
 }
 
+.update-version {
+  font-size: 11px;
+  color: var(--ink-subtle);
+  margin-bottom: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+}
+
+.update-body {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+}
+
+.update-body li {
+  font-size: 14px;
+  color: var(--ink);
+  padding: 6px 0 6px 1.2em;
+  position: relative;
+  line-height: 1.6;
+}
+
+.update-body li::before {
+  content: "・";
+  position: absolute;
+  left: 0;
+  color: var(--ink-muted);
+}
+
 .modal-error {
   color: var(--danger);
   font-size: 12px;

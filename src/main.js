@@ -908,9 +908,46 @@ if (isDebugMode()) {
   })
 }
 
+// --- Version update notice ---
+
+const APP_VERSION = __APP_VERSION__
+const VERSION_KEY = 'ohayominext_lastSeenVersion'
+
+async function checkVersionUpdate() {
+  const lastSeen = localStorage.getItem(VERSION_KEY)
+  if (lastSeen === APP_VERSION) return
+
+  // 現バージョンの更新内容を取得
+  let items = null
+  try {
+    const res = await fetch(import.meta.env.BASE_URL + 'updates.json?t=' + Date.now())
+    if (res.ok) {
+      const data = await res.json()
+      items = data[APP_VERSION]
+    }
+  } catch {
+    // 失敗時はモーダルを出さない
+  }
+
+  if (!items || items.length === 0) {
+    localStorage.setItem(VERSION_KEY, APP_VERSION)
+    return
+  }
+
+  $('updateVersion').textContent = 'v' + APP_VERSION
+  $('updateBody').innerHTML = items.map((t) => `<li>${escapeHtml(t)}</li>`).join('')
+  const modal = $('updateModal')
+  openModal(modal)
+  $('updateCloseBtn').addEventListener('click', () => {
+    localStorage.setItem(VERSION_KEY, APP_VERSION)
+    closeModal(modal)
+  }, { once: true })
+}
+
 // --- Init ---
 
 runMigrationIfNeeded()
 checkAndResetIfNeeded()
 render()
 refreshAllCreators()
+checkVersionUpdate()

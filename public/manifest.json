@@ -1,12 +1,12 @@
 {
   "name": "おはヨミ",
   "short_name": "おはヨミ",
-  "description": "朝活クリエイターのチェックリスト",
+  "description": "推しクリエイターの記事を読みに行く習慣をつくるPWA",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#00b86b",
+  "theme_color": "#0a0a0a",
   "icons": [
     {
       "src": "./icons/icon.svg",

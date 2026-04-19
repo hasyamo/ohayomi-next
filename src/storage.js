@@ -1,10 +1,10 @@
 const KEYS = {
-  creators: 'ohayomi_creators',
-  dailyStatus: 'ohayomi_dailyStatus',
-  lastResetAt: 'ohayomi_lastResetAt',
-  streak: 'ohayomi_streak',
-  pendingCreatorId: 'ohayomi_pendingCreatorId',
-  schemaVersion: 'ohayomi_schemaVersion',
+  creators: 'ohayominext_creators',
+  dailyStatus: 'ohayominext_dailyStatus',
+  lastResetAt: 'ohayominext_lastResetAt',
+  streak: 'ohayominext_streak',
+  pendingCreatorId: 'ohayominext_pendingCreatorId',
+  schemaVersion: 'ohayominext_schemaVersion',
 }
 
 const CURRENT_SCHEMA_VERSION = 2

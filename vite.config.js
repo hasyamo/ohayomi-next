@@ -3,13 +3,13 @@ import { writeFileSync } from 'fs'
 import { resolve } from 'path'
 
 export default defineConfig({
-  base: '/ohayomi/',
+  base: '/ohayomi-next/',
   plugins: [
     {
       name: 'generate-sw',
       closeBundle() {
         const version = Date.now().toString()
-        const sw = `const CACHE_NAME = 'ohayomi-${version}'
+        const sw = `const CACHE_NAME = 'ohayomi-next-${version}'
 
 // Install: precache shell
 self.addEventListener('install', (e) => {

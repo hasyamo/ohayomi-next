@@ -439,12 +439,12 @@ function maybeShowReward(lv1) {
   })
   if (!allDone) return
   const today = todayKey()
-  const shown = localStorage.getItem('ohayomi_rewardShownAt')
+  const shown = localStorage.getItem('ohayominext_rewardShownAt')
   if (shown === today) return
   if (lastRewardShownDate === today) return
 
   lastRewardShownDate = today
-  localStorage.setItem('ohayomi_rewardShownAt', today)
+  localStorage.setItem('ohayominext_rewardShownAt', today)
 
   const wk = weekdayKey()
   const char = lines.characters[wk]
@@ -729,7 +729,7 @@ $('settingsCloseBtn').addEventListener('click', () => closeModal(settingsModal))
 
 $('resetBtn').addEventListener('click', () => {
   resetAllStatus()
-  localStorage.removeItem('ohayomi_rewardShownAt')
+  localStorage.removeItem('ohayominext_rewardShownAt')
   lastRewardShownDate = null
   render()
   closeModal(settingsModal)
@@ -740,7 +740,7 @@ $('exportBtn').addEventListener('click', () => {
   const blob = new Blob([json], { type: 'application/json' })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
-  a.download = 'ohayomi-backup.json'
+  a.download = 'ohayomi-next-backup.json'
   a.click()
   URL.revokeObjectURL(a.href)
 })
@@ -844,7 +844,7 @@ function shiftTimeBackward(days) {
   // days > 0: 時計を進めた扱い（既存データを過去へ）
   // days < 0: 時計を戻す扱い（既存データを未来へ）
   const ms = days * 24 * 60 * 60 * 1000
-  const creators = JSON.parse(localStorage.getItem('ohayomi_creators') || '[]')
+  const creators = JSON.parse(localStorage.getItem('ohayominext_creators') || '[]')
   creators.forEach((c) => {
     if (c.lastVisitedAt) {
       c.lastVisitedAt = new Date(new Date(c.lastVisitedAt).getTime() - ms).toISOString()
@@ -853,19 +853,19 @@ function shiftTimeBackward(days) {
       c.lastApiCheckedAt = new Date(new Date(c.lastApiCheckedAt).getTime() - ms).toISOString()
     }
   })
-  localStorage.setItem('ohayomi_creators', JSON.stringify(creators))
+  localStorage.setItem('ohayominext_creators', JSON.stringify(creators))
 
   // lastResetAt も過去にずらす（+方向の時は次回 render で自動リセットが走るように過去に寄せる）
   if (days > 0) {
     // 進める方向: 最後のリセットを十分過去に置いて、checkAndResetIfNeeded でリセットを走らせる
-    localStorage.removeItem('ohayomi_lastResetAt')
+    localStorage.removeItem('ohayominext_lastResetAt')
   } else {
     // 戻す方向: lastResetAt は触らない（今日のままでOK）
   }
 
   // dailyStatus は完全にクリア（read/commented/expandIds すべて）
-  localStorage.removeItem('ohayomi_dailyStatus')
-  localStorage.removeItem('ohayomi_rewardShownAt')
+  localStorage.removeItem('ohayominext_dailyStatus')
+  localStorage.removeItem('ohayominext_rewardShownAt')
 }
 
 if (isDebugMode()) {

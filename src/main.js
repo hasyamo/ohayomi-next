@@ -208,94 +208,11 @@ function buildCard(creator) {
         ${badgeNew}
         <div class="status-toggles">${toggles}</div>
       </div>
-      <button class="drag-handle" aria-label="並び替え" title="ドラッグで並び替え">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <line x1="3" y1="4" x2="11" y2="4"/>
-          <line x1="3" y1="7" x2="11" y2="7"/>
-          <line x1="3" y1="10" x2="11" y2="10"/>
-        </svg>
-      </button>
     </div>
   `
 
   attachCardEvents(card, creator)
-  attachDragEvents(card, creator)
   return card
-}
-
-// --- Drag & Drop ---
-
-let dragState = null
-
-function attachDragEvents(card, creator) {
-  const handle = card.querySelector('.drag-handle')
-  if (!handle) return
-  handle.setAttribute('draggable', 'true')
-  card.dataset.creatorId = creator.id
-
-  handle.addEventListener('dragstart', (e) => {
-    dragState = { creatorId: creator.id, sourceCard: card }
-    card.classList.add('card--dragging')
-    e.dataTransfer.effectAllowed = 'move'
-    e.dataTransfer.setData('text/plain', creator.id)
-    if (e.dataTransfer.setDragImage) {
-      e.dataTransfer.setDragImage(card, 20, 20)
-    }
-  })
-
-  handle.addEventListener('dragend', () => {
-    card.classList.remove('card--dragging')
-    document.querySelectorAll('.card--drop-before, .card--drop-after').forEach((el) => {
-      el.classList.remove('card--drop-before', 'card--drop-after')
-    })
-    dragState = null
-  })
-
-  card.addEventListener('dragover', (e) => {
-    if (!dragState) return
-    if (dragState.creatorId === creator.id) return
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-    const rect = card.getBoundingClientRect()
-    const before = e.clientY < rect.top + rect.height / 2
-    card.classList.toggle('card--drop-before', before)
-    card.classList.toggle('card--drop-after', !before)
-  })
-
-  card.addEventListener('dragleave', () => {
-    card.classList.remove('card--drop-before', 'card--drop-after')
-  })
-
-  card.addEventListener('drop', (e) => {
-    if (!dragState) return
-    e.preventDefault()
-    const rect = card.getBoundingClientRect()
-    const before = e.clientY < rect.top + rect.height / 2
-    card.classList.remove('card--drop-before', 'card--drop-after')
-    reorderByDrop(dragState.creatorId, creator.id, before)
-  })
-}
-
-function reorderByDrop(sourceId, targetId, before) {
-  if (sourceId === targetId) return
-  const creators = getActiveCreators()
-  const source = creators.find((c) => c.id === sourceId)
-  const target = creators.find((c) => c.id === targetId)
-  if (!source || !target) return
-
-  // Rebuild order: remove source, then insert at target's position (before/after)
-  const others = creators.filter((c) => c.id !== sourceId)
-  const targetIdx = others.findIndex((c) => c.id === targetId)
-  const insertIdx = before ? targetIdx : targetIdx + 1
-  others.splice(insertIdx, 0, source)
-
-  // Re-assign order 1..N
-  const orderedIds = others.map((c) => c.id)
-  // reorderCreators も使えるが、archived も含めて order を振り直すために updateCreator を使う
-  orderedIds.forEach((id, i) => {
-    updateCreator(id, { order: i + 1 })
-  })
-  render()
 }
 
 function attachCardEvents(card, creator) {
@@ -304,7 +221,6 @@ function attachCardEvents(card, creator) {
 
   const startPress = (e) => {
     if (e.target.closest('.status-toggle')) return
-    if (e.target.closest('.drag-handle')) return
     longPressed = false
     pressTimer = setTimeout(() => {
       longPressed = true
@@ -335,7 +251,6 @@ function attachCardEvents(card, creator) {
 
   card.addEventListener('click', (e) => {
     if (e.target.closest('.status-toggle')) return
-    if (e.target.closest('.drag-handle')) return
     if (longPressed) {
       e.preventDefault()
       e.stopPropagation()
@@ -346,7 +261,6 @@ function attachCardEvents(card, creator) {
 
   card.addEventListener('contextmenu', (e) => {
     if (e.target.closest('.status-toggle')) return
-    if (e.target.closest('.drag-handle')) return
     e.preventDefault()
     openActionMenu(creator)
   })
@@ -907,6 +821,99 @@ if (isDebugMode()) {
     })
   })
 }
+
+// --- Sort modal ---
+
+const sortModal = $('sortModal')
+const sortList = $('sortList')
+let currentSortSection = null
+
+const SECTION_LABELS = {
+  lv1: 'コミュニティ',
+  expand: 'ひろがり',
+  slow: 'ゆっくり',
+}
+
+function openSortModal(section) {
+  currentSortSection = section
+  $('sortModalTitle').textContent = SECTION_LABELS[section] + 'の並び替え'
+  renderSortList()
+  openModal(sortModal)
+}
+
+function getSectionCreators(section) {
+  const creators = getActiveCreators()
+  const byOrder = (a, b) => a.order - b.order
+  if (section === 'lv1') {
+    return creators.filter((c) => c.level === LEVELS.LV1).sort(byOrder)
+  }
+  if (section === 'expand') {
+    return creators.filter((c) => c.level !== LEVELS.LV1 && isInTodayExpand(c.id)).sort(byOrder)
+  }
+  if (section === 'slow') {
+    return creators.filter((c) => c.level !== LEVELS.LV1 && !isInTodayExpand(c.id)).sort(byOrder)
+  }
+  return []
+}
+
+function renderSortList() {
+  const list = getSectionCreators(currentSortSection)
+  if (list.length === 0) {
+    sortList.innerHTML = '<p class="sort-empty">該当する人はいません。</p>'
+    return
+  }
+  sortList.innerHTML = list
+    .map(
+      (c, i) => `
+    <div class="sort-item">
+      <div class="card-icon">${
+        c.iconUrl ? `<img src="${encodeURI(c.iconUrl)}" alt="" />` : '👤'
+      }</div>
+      <span class="sort-name">${escapeHtml(c.name)}</span>
+      <div class="sort-btns">
+        <button class="sort-btn" data-move-up="${c.id}" ${i === 0 ? 'disabled' : ''} aria-label="上へ">▲</button>
+        <button class="sort-btn" data-move-down="${c.id}" ${i === list.length - 1 ? 'disabled' : ''} aria-label="下へ">▼</button>
+      </div>
+    </div>
+  `
+    )
+    .join('')
+
+  sortList.querySelectorAll('[data-move-up]').forEach((btn) => {
+    btn.addEventListener('click', () => moveSortItem(btn.dataset.moveUp, -1))
+  })
+  sortList.querySelectorAll('[data-move-down]').forEach((btn) => {
+    btn.addEventListener('click', () => moveSortItem(btn.dataset.moveDown, 1))
+  })
+}
+
+function moveSortItem(id, direction) {
+  const list = getSectionCreators(currentSortSection)
+  const idx = list.findIndex((c) => c.id === id)
+  const swapIdx = idx + direction
+  if (idx < 0 || swapIdx < 0 || swapIdx >= list.length) return
+
+  // 該当2人のorderを入れ替える
+  const a = list[idx]
+  const b = list[swapIdx]
+  const aOrder = a.order
+  updateCreator(a.id, { order: b.order })
+  updateCreator(b.id, { order: aOrder })
+
+  renderSortList()
+  render()
+}
+
+document.querySelectorAll('[data-sort-section]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    openSortModal(btn.dataset.sortSection)
+  })
+})
+
+$('sortCloseBtn').addEventListener('click', () => {
+  currentSortSection = null
+  closeModal(sortModal)
+})
 
 // --- Version update notice ---
 

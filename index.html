@@ -57,6 +57,7 @@
         <h2 class="section-title">
           <span class="section-title-label">コミュニティ</span>
           <span class="section-title-meta" id="lv1Meta"></span>
+          <button class="section-sort-btn" data-sort-section="lv1" aria-label="コミュニティを並び替え">並び替え</button>
         </h2>
         <div class="grid" id="lv1Grid"></div>
         <p class="section-empty" id="lv1Empty" hidden>コミュニティはまだ登録されていません。カードを長押しすると、頻度を変更できます。</p>
@@ -67,6 +68,7 @@
         <h2 class="section-title">
           <span class="section-title-label">ひろがり</span>
           <span class="section-title-meta" id="expandMeta"></span>
+          <button class="section-sort-btn" data-sort-section="expand" aria-label="ひろがりを並び替え">並び替え</button>
         </h2>
         <div class="grid" id="expandGrid"></div>
         <p class="section-empty" id="expandEmpty" hidden>今日のローテーションに入っている人はいません。</p>
@@ -77,6 +79,7 @@
         <h2 class="section-title">
           <span class="section-title-label">ゆっくり</span>
           <span class="section-title-meta" id="slowMeta"></span>
+          <button class="section-sort-btn" data-sort-section="slow" aria-label="ゆっくりを並び替え">並び替え</button>
         </h2>
         <div class="grid" id="slowGrid"></div>
         <p class="section-empty" id="slowEmpty" hidden>該当する人はいません。</p>
@@ -254,6 +257,17 @@
         <div class="modal-actions">
           <button class="btn btn-secondary" id="importCancelBtn">キャンセル</button>
           <button class="btn btn-primary" id="importConfirmBtn">読み込む</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sort Modal -->
+    <div class="modal-overlay" id="sortModal">
+      <div class="modal">
+        <h2 class="modal-title" id="sortModalTitle">並び替え</h2>
+        <div id="sortList" class="sort-list"></div>
+        <div class="modal-actions">
+          <button class="btn btn-primary btn-full" id="sortCloseBtn">閉じる</button>
         </div>
       </div>
     </div>

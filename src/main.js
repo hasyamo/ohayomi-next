@@ -304,8 +304,17 @@ function renderNavi(all, lv1, expand) {
     return
   }
 
-  const lv1New = lv1.reduce((sum, c) => sum + newArticleCount(c), 0)
-  const expandNew = expand.reduce((sum, c) => sum + newArticleCount(c), 0)
+  // 未チェックのクリエイターに来ている新着だけをカウント
+  const lv1New = lv1.reduce((sum, c) => {
+    const s = getCreatorStatus(c.id)
+    if (s.read || s.commented) return sum
+    return sum + newArticleCount(c)
+  }, 0)
+  const expandNew = expand.reduce((sum, c) => {
+    const s = getCreatorStatus(c.id)
+    if (s.read || s.commented) return sum
+    return sum + newArticleCount(c)
+  }, 0)
   const lv1All = lv1.length
   const lv1Done = lv1.filter((c) => {
     const s = getCreatorStatus(c.id)
@@ -371,7 +380,10 @@ function maybeShowReward(lv1) {
   openModal(rewardModal)
 }
 
-$('rewardCloseBtn').addEventListener('click', () => closeModal(rewardModal))
+$('rewardCloseBtn').addEventListener('click', (e) => {
+  e.stopPropagation()
+  closeModal(rewardModal)
+})
 
 // --- Navigation to note ---
 

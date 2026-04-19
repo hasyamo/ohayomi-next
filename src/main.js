@@ -920,6 +920,9 @@ $('sortCloseBtn').addEventListener('click', () => {
 const APP_VERSION = __APP_VERSION__
 const VERSION_KEY = 'ohayominext_lastSeenVersion'
 
+// ヘッダーにバージョン表示
+$('headerVersion').textContent = 'v' + APP_VERSION
+
 async function checkVersionUpdate() {
   const lastSeen = localStorage.getItem(VERSION_KEY)
   if (lastSeen === APP_VERSION) return

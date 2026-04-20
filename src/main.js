@@ -701,18 +701,26 @@ $('importBtn').addEventListener('click', () => {
 })
 
 $('importConfirmBtn').addEventListener('click', () => {
-  const json = importText.value.trim()
-  if (!json) {
+  const raw = importText.value.trim()
+  if (!raw) {
     importError.textContent = 'テキストを貼り付けてください'
     return
   }
+  // 貼り付けで混入しがちな不可視文字の正規化
+  // - BOM, ゼロ幅スペースを除去
+  // - ノーブレークスペース等を通常スペースに
+  const json = raw
+    .replace(/^\uFEFF/, '')
+    .replace(/[\u200B-\u200D]/g, '')
+    .replace(/[\u00A0\u2007\u202F]/g, ' ')
   try {
     importData(json)
     render()
     closeModal(importModal)
     refreshAllCreators()
-  } catch {
-    importError.textContent = '読み込みに失敗しました。正しい形式のテキストを貼り付けてください。'
+  } catch (e) {
+    console.error('Import failed:', e)
+    importError.textContent = '読み込みに失敗しました: ' + (e && e.message ? e.message : '不明なエラー')
   }
 })
 

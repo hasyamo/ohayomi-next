@@ -202,10 +202,9 @@ function buildCard(creator) {
       }</div>
       <div class="card-main">
         <div class="card-name">${escapeHtml(creator.name)}</div>
-        <div class="card-meta"><span class="card-level ${levelLabelClass}">${levelLabel}</span><span class="card-visit"> · ${visitLabel}</span></div>
+        <div class="card-meta"><span class="card-level ${levelLabelClass}">${levelLabel}</span><span class="card-visit"> · ${visitLabel}</span>${badgeNew}</div>
       </div>
       <div class="card-right">
-        ${badgeNew}
         <div class="status-toggles">${toggles}</div>
       </div>
     </div>

@@ -411,11 +411,17 @@ body {
   font-family: 'JetBrains Mono', monospace;
   display: flex;
   align-items: center;
-  gap: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  gap: 6px;
+  flex-wrap: wrap;
   min-width: 0;
+}
+
+.card-meta .card-visit {
+  white-space: nowrap;
+}
+
+.card-meta .badge-new {
+  margin-left: 2px;
 }
 
 .card-level {
@@ -458,8 +464,8 @@ body {
 }
 
 .badge-new {
-  background: var(--ink);
-  color: var(--on-accent);
+  background: #dc2626;
+  color: #ffffff;
   font-size: 10px;
   font-weight: 600;
   padding: 2px 6px;

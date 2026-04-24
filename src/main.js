@@ -645,9 +645,25 @@ $('actionMenuCloseBtn').addEventListener('click', () => {
 
 // --- Settings ---
 
+const SIMPLE_MOBILE_KEY = 'ohayominext_simpleMobile'
+
+function applySimpleMobile(enabled) {
+  document.body.classList.toggle('is-simple-mobile', enabled)
+}
+
+// 起動時に反映
+applySimpleMobile(localStorage.getItem(SIMPLE_MOBILE_KEY) === '1')
+
 $('settingsBtn').addEventListener('click', () => {
   renderArchivedList()
+  $('simpleMobileToggle').checked = localStorage.getItem(SIMPLE_MOBILE_KEY) === '1'
   openModal(settingsModal)
+})
+
+$('simpleMobileToggle').addEventListener('change', (e) => {
+  const enabled = e.target.checked
+  localStorage.setItem(SIMPLE_MOBILE_KEY, enabled ? '1' : '0')
+  applySimpleMobile(enabled)
 })
 
 $('settingsCloseBtn').addEventListener('click', () => closeModal(settingsModal))

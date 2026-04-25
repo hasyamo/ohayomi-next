@@ -82,12 +82,15 @@ export function addCreator(username, name) {
   const exists = creators.find((c) => c.username === username)
   if (exists) return null
 
+  // note.com URL は # より前の本来の username で組み立てる
+  const baseUsername = username.indexOf('#') >= 0 ? username.slice(0, username.indexOf('#')) : username
+
   const maxOrder = creators.reduce((max, c) => Math.max(max, c.order), 0)
   const creator = {
     id: 'c' + Date.now(),
     username,
     name: name || username,
-    url: `https://note.com/${username}`,
+    url: `https://note.com/${baseUsername}`,
     iconUrl: null,
     headerImageUrl: null,
     order: maxOrder + 1,
@@ -342,8 +345,12 @@ export function importData(json) {
 
 export function parseNoteUrl(url) {
   const match = url.match(/note\.com\/([^\/\?#]+)/)
-  if (match && match[1] !== 'api') {
-    return match[1]
+  if (!match || match[1] === 'api') return null
+  const base = match[1]
+  // URL末尾に #2 のような数字サフィックスがあれば、重複登録用のエイリアスとして保持
+  const aliasMatch = url.match(/#(\d+)\s*$/)
+  if (aliasMatch) {
+    return `${base}#${aliasMatch[1]}`
   }
-  return null
+  return base
 }

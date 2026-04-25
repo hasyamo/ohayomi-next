@@ -312,11 +312,9 @@ body {
   background-size: 16px 16px, auto;
 }
 
-/* シンプル表示モード（スマホのみ）: ヘッダー画像を隠す */
-@media (max-width: 639px) {
-  body.is-simple-mobile .card-header-bg {
-    display: none;
-  }
+/* シンプル表示モード: ヘッダー画像を隠す */
+body.is-simple-mobile .card-header-bg {
+  display: none;
 }
 
 .card-body {

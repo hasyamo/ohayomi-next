@@ -1,7 +1,14 @@
 const PROXY_URL = 'https://falling-mouse-736b.hasyamo.workers.dev/'
 
+// 「hasyamo#2」のような複製用サフィックスを落とす
+function stripAlias(username) {
+  const hash = username.indexOf('#')
+  return hash >= 0 ? username.slice(0, hash) : username
+}
+
 export async function fetchCreator(username) {
-  const url = `${PROXY_URL}?id=${encodeURIComponent(username)}`
+  const id = stripAlias(username)
+  const url = `${PROXY_URL}?id=${encodeURIComponent(id)}`
   const res = await fetch(url)
 
   if (!res.ok) {

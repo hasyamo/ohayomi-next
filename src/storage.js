@@ -5,6 +5,7 @@ const KEYS = {
   streak: 'ohayominext_streak',
   pendingCreatorId: 'ohayominext_pendingCreatorId',
   schemaVersion: 'ohayominext_schemaVersion',
+  anniversaries: 'ohayominext_anniversaries',
 }
 
 const CURRENT_SCHEMA_VERSION = 2
@@ -136,6 +137,9 @@ export function deleteCreator(id) {
     daily.expandIds = daily.expandIds.filter((x) => x !== id)
   }
   saveDailyStatus(daily)
+
+  // 紐づく記念日も片付ける
+  saveAnniversaries(getAnniversaries().filter((a) => a.creatorId !== id))
 }
 
 // --- Level ---
@@ -318,6 +322,7 @@ export function exportData() {
     creators: getCreators(),
     dailyStatus: getDailyStatus(),
     lastResetAt: getLastResetAt(),
+    anniversaries: getAnniversaries(),
   }, null, 2)
 }
 
@@ -330,6 +335,10 @@ export function importData(json) {
     if (data.schemaVersion) {
       localStorage.setItem(KEYS.schemaVersion, String(data.schemaVersion))
     }
+    // 記念日は未対応バージョンのエクスポートも想定し、無ければ既存データを保持する
+    if (Array.isArray(data.anniversaries)) {
+      saveAnniversaries(data.anniversaries)
+    }
     runMigrationIfNeeded()
     return
   }
@@ -339,6 +348,99 @@ export function importData(json) {
     return
   }
   throw new Error('Invalid format')
+}
+
+// --- Anniversaries ---
+
+export function getAnniversaries() {
+  return JSON.parse(localStorage.getItem(KEYS.anniversaries) || '[]')
+}
+
+export function getAnniversariesForCreator(creatorId) {
+  return getAnniversaries().filter((a) => a.creatorId === creatorId)
+}
+
+function saveAnniversaries(list) {
+  localStorage.setItem(KEYS.anniversaries, JSON.stringify(list))
+}
+
+// 生年を持たない前提で、月日として妥当か判定する（2/29は許可、2/30・4/31等は不可）
+// うるう年（2028年）を基準に判定することで、2/29だけを正しく通す
+export function isValidMonthDay(month, day) {
+  if (!Number.isInteger(month) || !Number.isInteger(day)) return false
+  if (month < 1 || month > 12) return false
+  if (day < 1 || day > 31) return false
+  const daysInMonth = new Date(2028, month, 0).getDate()
+  return day <= daysInMonth
+}
+
+export function addAnniversary(creatorId, { label, month, day, notifyDaysBefore, note }) {
+  if (!creatorId) return null
+  if (!label || !label.trim()) return null
+  if (!isValidMonthDay(month, day)) return null
+  if (!Number.isInteger(notifyDaysBefore) || notifyDaysBefore < 0) return null
+
+  const list = getAnniversaries()
+  const nowIso = new Date().toISOString()
+  const anniversary = {
+    id: 'a' + Date.now() + Math.random().toString(36).slice(2, 7),
+    creatorId,
+    label: label.trim(),
+    month,
+    day,
+    notifyDaysBefore,
+    note: note && note.trim() ? note.trim() : undefined,
+    enabled: true,
+    createdAt: nowIso,
+    updatedAt: nowIso,
+  }
+  list.push(anniversary)
+  saveAnniversaries(list)
+  return anniversary
+}
+
+export function updateAnniversary(id, updates) {
+  const list = getAnniversaries()
+  const idx = list.findIndex((a) => a.id === id)
+  if (idx === -1) return null
+
+  const merged = { ...list[idx], ...updates }
+  if ('label' in updates && (!merged.label || !merged.label.trim())) return null
+  if (('month' in updates || 'day' in updates) && !isValidMonthDay(merged.month, merged.day)) return null
+  if ('notifyDaysBefore' in updates && (!Number.isInteger(merged.notifyDaysBefore) || merged.notifyDaysBefore < 0)) return null
+
+  merged.label = merged.label.trim()
+  merged.note = merged.note && merged.note.trim() ? merged.note.trim() : undefined
+  merged.updatedAt = new Date().toISOString()
+
+  list[idx] = merged
+  saveAnniversaries(list)
+  return merged
+}
+
+export function deleteAnniversary(id) {
+  saveAnniversaries(getAnniversaries().filter((a) => a.id !== id))
+}
+
+export function setAnniversaryEnabled(id, enabled) {
+  return updateAnniversary(id, { enabled })
+}
+
+// 現在日から次に到来する month/day までの日数（0 = 今日）
+export function daysUntilAnniversary(month, day, now = new Date()) {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const thisYear = new Date(now.getFullYear(), month - 1, day)
+  const target = thisYear >= today ? thisYear : new Date(now.getFullYear() + 1, month - 1, day)
+  return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+}
+
+// 有効な記念日のうち、事前表示期間に入っているものだけを日数昇順で返す
+export function getUpcomingAnniversaries(creatorId, now = new Date()) {
+  return getAnniversariesForCreator(creatorId)
+    .filter((a) => a.enabled)
+    .map((a) => ({ ...a, daysUntil: daysUntilAnniversary(a.month, a.day, now) }))
+    .filter((a) => a.daysUntil <= a.notifyDaysBefore)
+    .sort((a, b) => a.daysUntil - b.daysUntil)
 }
 
 // --- URL Parsing ---

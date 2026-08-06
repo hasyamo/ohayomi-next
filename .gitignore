@@ -1,2 +1,6 @@
 node_modules
 dist
+
+# Mio working handoff files
+.mio/handoff.md
+.mio/result.md

@@ -11,6 +11,10 @@
   --on-accent: #ffffff;
   --danger: #b91c1c;
   --danger-bg: #fef2f2;
+  --anniv: #db2777;
+  --anniv-bg: #fdf2f8;
+  --anniv-today-bg: #db2777;
+  --anniv-ink: #831843;
   --radius: 14px;
   --radius-sm: 8px;
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
@@ -125,10 +129,45 @@ body {
   gap: 14px;
   align-items: center;
   box-shadow: var(--shadow-md);
+  transition: background 0.2s;
 }
 
 .navi[hidden] {
   display: none;
+}
+
+.navi--anniv {
+  background: var(--anniv-bg);
+}
+
+.navi--anniv .navi-image {
+  border-color: var(--anniv);
+}
+
+.navi--anniv .navi-name {
+  color: var(--anniv);
+  opacity: 1;
+}
+
+.navi--anniv .navi-line {
+  color: var(--anniv-ink);
+}
+
+.navi--anniv-today {
+  background: var(--anniv-today-bg);
+}
+
+.navi--anniv-today .navi-image {
+  border-color: var(--on-accent);
+}
+
+.navi--anniv-today .navi-name {
+  color: var(--on-accent);
+  opacity: 0.85;
+}
+
+.navi--anniv-today .navi-line {
+  color: var(--on-accent);
 }
 
 .navi-char {
@@ -159,6 +198,46 @@ body {
   font-size: 14px;
   line-height: 1.6;
   flex: 1;
+}
+
+.anniv-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  margin: 12px 0 20px;
+  padding: 7px 14px;
+  border: 1px solid var(--anniv);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--anniv);
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.anniv-filter-btn::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.anniv-filter-btn:hover {
+  background: var(--anniv-bg);
+}
+
+.anniv-filter-btn[aria-pressed="true"] {
+  background: var(--anniv);
+  color: var(--on-accent);
+}
+
+.anniv-filter-btn[hidden] {
+  display: none;
 }
 
 /* --- Section --- */
@@ -479,6 +558,30 @@ body.is-simple-mobile .card-header-bg {
   letter-spacing: 0.03em;
 }
 
+.card-anniversary {
+  margin-top: 4px;
+}
+
+.badge-anniv {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.02em;
+  background: var(--anniv-bg);
+  color: var(--anniv);
+  border: 1px solid var(--anniv);
+}
+
+.badge-anniv--today {
+  background: var(--anniv-today-bg);
+  color: var(--on-accent);
+  border-color: transparent;
+}
+
 .status-toggles {
   display: flex;
   gap: 4px;
@@ -679,6 +782,30 @@ body.is-simple-mobile .card-header-bg {
 
 .modal-input:focus {
   border-color: var(--ink);
+}
+
+.modal-field {
+  margin-bottom: 14px;
+}
+
+.modal-sub {
+  font-size: 12px;
+  color: var(--ink-subtle);
+  margin-bottom: 16px;
+}
+
+.modal-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.modal-input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
 }
 
 .modal-textarea {
@@ -1045,6 +1172,144 @@ body.is-simple-mobile .card-header-bg {
 .archived-item .btn {
   padding: 5px 12px;
   font-size: 11px;
+}
+
+/* --- Anniversary list / form --- */
+
+.anniversary-list {
+  min-height: 32px;
+  margin-bottom: 14px;
+}
+
+.anniversary-empty {
+  color: var(--ink-subtle);
+  font-size: 12px;
+  padding: 6px 0;
+}
+
+.anniversary-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+}
+
+.anniversary-item + .anniversary-item {
+  margin-top: 8px;
+}
+
+.anniversary-item--disabled {
+  opacity: 0.45;
+}
+
+.anniversary-date-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  text-align: center;
+  line-height: 1.15;
+  flex-shrink: 0;
+  min-width: 40px;
+}
+
+.anniversary-date-chip .month {
+  font-size: 9px;
+  color: var(--ink-subtle);
+  display: block;
+}
+
+.anniversary-date-chip .day {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.anniversary-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.anniversary-info-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.anniversary-info-days {
+  font-size: 9.5px;
+  color: var(--ink-subtle);
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.anniversary-info-note {
+  font-size: 11px;
+  color: var(--ink-subtle);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.anniversary-item-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.anniversary-icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.anniversary-icon-btn:hover {
+  background: var(--surface-alt);
+  border-color: var(--ink);
+}
+
+.btn-add-anniversary {
+  width: 100%;
+  padding: 10px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  font-family: inherit;
+  margin-bottom: 16px;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.btn-add-anniversary:hover {
+  background: var(--surface-alt);
+  border-color: var(--ink);
 }
 
 .data-actions {

@@ -23,6 +23,13 @@ import {
   exportData,
   importData,
   LEVELS,
+  getAnniversariesForCreator,
+  getUpcomingAnniversaries,
+  addAnniversary,
+  updateAnniversary,
+  deleteAnniversary,
+  setAnniversaryEnabled,
+  isValidMonthDay,
 } from './storage.js'
 import { fetchCreator } from './api.js'
 import lines from './lines.json'
@@ -38,6 +45,8 @@ const statusModal = $('statusModal')
 const actionMenuModal = $('actionMenuModal')
 const rewardModal = $('rewardModal')
 const settingsModal = $('settingsModal')
+const anniversaryListModal = $('anniversaryListModal')
+const anniversaryFormModal = $('anniversaryFormModal')
 
 // Inputs
 const noteUrlInput = $('noteUrlInput')
@@ -62,10 +71,12 @@ const slowGrid = $('slowGrid')
 const slowEmpty = $('slowEmpty')
 const slowMeta = $('slowMeta')
 const emptyState = $('emptyState')
+const anniversaryFilterBtn = $('anniversaryFilterBtn')
 
 let currentStatusId = null
 let currentActionId = null
 let lastRewardShownDate = null
+let anniversaryFilterEnabled = false
 
 // --- Utils ---
 
@@ -88,6 +99,14 @@ function daysSinceVisit(creator) {
   if (!creator.lastVisitedAt) return null
   const ms = Date.now() - new Date(creator.lastVisitedAt).getTime()
   return Math.floor(ms / (1000 * 60 * 60 * 24))
+}
+
+function formatAnniversaryDays(label, daysUntil) {
+  return daysUntil === 0 ? `今日が${label}` : `${label}まで${daysUntil}日`
+}
+
+function hasAnyAnniversary(creator) {
+  return getAnniversariesForCreator(creator.id).length > 0
 }
 
 // --- Rendering ---
@@ -123,16 +142,35 @@ function render() {
     .filter((c) => c.level !== LEVELS.LV1 && !isInTodayExpand(c.id))
     .sort(byOrder)
 
-  renderGrid(lv1Grid, lv1)
-  lv1Empty.hidden = lv1.length > 0
+  // 記念日フィルターの表示可否（誰も記念日を登録していなければボタンごと隠す）
+  const anyAnniversaryRegistered = creators.some(hasAnyAnniversary)
+  anniversaryFilterBtn.hidden = !anyAnniversaryRegistered
+  if (!anyAnniversaryRegistered) anniversaryFilterEnabled = false
+  anniversaryFilterBtn.setAttribute('aria-pressed', String(anniversaryFilterEnabled))
+
+  const lv1View = anniversaryFilterEnabled ? lv1.filter(hasAnyAnniversary) : lv1
+  const expandView = anniversaryFilterEnabled ? expand.filter(hasAnyAnniversary) : expand
+  const slowView = anniversaryFilterEnabled ? slow.filter(hasAnyAnniversary) : slow
+
+  renderGrid(lv1Grid, lv1View)
+  lv1Empty.hidden = lv1View.length > 0
+  lv1Empty.textContent = anniversaryFilterEnabled
+    ? '記念日が登録されている人はいません。'
+    : 'コミュニティはまだ登録されていません。カードを長押しすると、頻度を変更できます。'
   lv1Meta.textContent = metaText(lv1)
 
-  renderGrid(expandGrid, expand)
-  expandEmpty.hidden = expand.length > 0
+  renderGrid(expandGrid, expandView)
+  expandEmpty.hidden = expandView.length > 0
+  expandEmpty.textContent = anniversaryFilterEnabled
+    ? '記念日が登録されている人はいません。'
+    : '今日のローテーションに入っている人はいません。'
   expandMeta.textContent = metaText(expand)
 
-  renderGrid(slowGrid, slow)
-  slowEmpty.hidden = slow.length > 0
+  renderGrid(slowGrid, slowView)
+  slowEmpty.hidden = slowView.length > 0
+  slowEmpty.textContent = anniversaryFilterEnabled
+    ? '記念日が登録されている人はいません。'
+    : '該当する人はいません。'
   slowMeta.textContent = metaText(slow)
 
   renderNavi(creators, lv1, expand)
@@ -192,6 +230,13 @@ function buildCard(creator) {
     ? `<div class="card-header-bg" style="background-image: url('${encodeURI(creator.headerImageUrl)}')"></div>`
     : `<div class="card-header-bg card-header-bg--empty"><span>No Image</span></div>`
 
+  const upcoming = getUpcomingAnniversaries(creator.id)
+  const anniversaryRow = upcoming.length > 0
+    ? `<div class="card-meta card-anniversary">${upcoming
+        .map((a) => `<span class="badge-anniv${a.daysUntil === 0 ? ' badge-anniv--today' : ''}">${escapeHtml(formatAnniversaryDays(a.label, a.daysUntil))}</span>`)
+        .join('')}</div>`
+    : ''
+
   card.innerHTML = `
     ${headerBg}
     <div class="card-body">
@@ -203,6 +248,7 @@ function buildCard(creator) {
       <div class="card-main">
         <div class="card-name">${escapeHtml(creator.name)}</div>
         <div class="card-meta"><span class="card-level ${levelLabelClass}">${levelLabel}</span><span class="card-visit"> · ${visitLabel}</span>${badgeNew}</div>
+        ${anniversaryRow}
       </div>
       <div class="card-right">
         <div class="status-toggles">${toggles}</div>
@@ -336,10 +382,30 @@ function renderNavi(all, lv1, expand) {
   const lv1Remaining = lv1All - lv1Done
   const text = fillTemplate(template, { lv1New, expandNew, lv1Done, lv1All, lv1Remaining })
 
+  const nearestAnniv = findNearestAnniversary(all)
+  const finalText = nearestAnniv && nearestAnniv.daysUntil === 0
+    ? `今日は、${nearestAnniv.creatorName}さんの${nearestAnniv.label}よ。忘れてないでしょうね。`
+    : text + (nearestAnniv ? `それと、${nearestAnniv.creatorName}さんの${nearestAnniv.label}まで${nearestAnniv.daysUntil}日。` : '')
+
   $('naviImage').src = assetPath(char.eyes)
   $('naviName').textContent = char.name
-  $('naviLine').textContent = text
+  $('naviLine').textContent = finalText
+  naviEl.classList.toggle('navi--anniv', !!nearestAnniv)
+  naviEl.classList.toggle('navi--anniv-today', !!nearestAnniv && nearestAnniv.daysUntil === 0)
   naviEl.hidden = false
+}
+
+// 全クリエイター中でもっとも近い記念日を1件選ぶ（同着は先頭のクリエイターを優先）
+function findNearestAnniversary(all) {
+  let nearest = null
+  all.forEach((c) => {
+    getUpcomingAnniversaries(c.id).forEach((a) => {
+      if (!nearest || a.daysUntil < nearest.daysUntil) {
+        nearest = { ...a, creatorName: c.name }
+      }
+    })
+  })
+  return nearest
 }
 
 function fillTemplate(tpl, vars) {
@@ -604,6 +670,15 @@ actionMenuModal.querySelectorAll('.action-btn[data-level]').forEach((btn) => {
   })
 })
 
+$('actionAnniversaryBtn').addEventListener('click', () => {
+  if (!currentActionId) return
+  const creator = getActiveCreators().find((c) => c.id === currentActionId)
+  if (!creator) return
+  closeModal(actionMenuModal)
+  openAnniversaryListModal(creator)
+  // currentActionId は記念日モーダル側で使い続けるため、ここではクリアしない
+})
+
 $('actionArchiveBtn').addEventListener('click', () => {
   if (!currentActionId) return
   updateCreator(currentActionId, { archived: true })
@@ -641,6 +716,164 @@ $('renameCancelBtn').addEventListener('click', () => {
 $('actionMenuCloseBtn').addEventListener('click', () => {
   currentActionId = null
   closeModal(actionMenuModal)
+})
+
+// --- Anniversary list modal ---
+
+let currentAnniversaryCreatorId = null
+let currentEditingAnniversaryId = null
+
+function openAnniversaryListModal(creator) {
+  currentAnniversaryCreatorId = creator.id
+  $('anniversaryListCreatorInfo').innerHTML = `
+    <div class="card-icon">${
+      creator.iconUrl
+        ? `<img src="${encodeURI(creator.iconUrl)}" alt="" />`
+        : '👤'
+    }</div>
+    <span>${escapeHtml(creator.name)}</span>
+  `
+  renderAnniversaryList()
+  openModal(anniversaryListModal)
+}
+
+function renderAnniversaryList() {
+  const list = $('anniversaryList')
+  const items = getAnniversariesForCreator(currentAnniversaryCreatorId)
+    .slice()
+    .sort((a, b) => a.month - b.month || a.day - b.day)
+
+  if (items.length === 0) {
+    list.innerHTML = '<p class="anniversary-empty">まだ記念日は登録されていません。</p>'
+    return
+  }
+
+  list.innerHTML = items
+    .map((a) => `
+    <div class="anniversary-item${a.enabled ? '' : ' anniversary-item--disabled'}">
+      <div class="anniversary-date-chip"><span class="month">${a.month}月</span><span class="day">${a.day}</span></div>
+      <div class="anniversary-info">
+        <div class="anniversary-info-label">${escapeHtml(a.label)}${a.enabled ? `<span class="anniversary-info-days">${a.notifyDaysBefore}日前〜</span>` : '<span class="anniversary-info-days">無効化中</span>'}</div>
+        ${a.note ? `<div class="anniversary-info-note">${escapeHtml(a.note)}</div>` : ''}
+      </div>
+      <div class="anniversary-item-actions">
+        <button class="anniversary-icon-btn" data-anniv-toggle="${a.id}" aria-label="${a.enabled ? '無効化' : '再有効化'}">${a.enabled ? '✓' : '○'}</button>
+        <button class="anniversary-icon-btn" data-anniv-edit="${a.id}" aria-label="編集">✎</button>
+        <button class="anniversary-icon-btn" data-anniv-delete="${a.id}" aria-label="削除">🗑</button>
+      </div>
+    </div>
+  `)
+    .join('')
+
+  list.querySelectorAll('[data-anniv-toggle]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.annivToggle
+      const current = getAnniversariesForCreator(currentAnniversaryCreatorId).find((a) => a.id === id)
+      if (!current) return
+      setAnniversaryEnabled(id, !current.enabled)
+      renderAnniversaryList()
+      render()
+    })
+  })
+
+  list.querySelectorAll('[data-anniv-edit]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.annivEdit
+      const anniv = getAnniversariesForCreator(currentAnniversaryCreatorId).find((a) => a.id === id)
+      if (!anniv) return
+      openAnniversaryFormModal(anniv)
+    })
+  })
+
+  list.querySelectorAll('[data-anniv-delete]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.annivDelete
+      const anniv = getAnniversariesForCreator(currentAnniversaryCreatorId).find((a) => a.id === id)
+      if (!anniv) return
+      if (!confirm(`「${anniv.label}」を削除しますか？`)) return
+      deleteAnniversary(id)
+      renderAnniversaryList()
+      render()
+    })
+  })
+}
+
+$('anniversaryAddBtn').addEventListener('click', () => {
+  openAnniversaryFormModal(null)
+})
+
+$('anniversaryListCloseBtn').addEventListener('click', () => {
+  currentAnniversaryCreatorId = null
+  currentActionId = null
+  closeModal(anniversaryListModal)
+})
+
+// --- Anniversary form modal (add/edit) ---
+
+function openAnniversaryFormModal(anniversary) {
+  currentEditingAnniversaryId = anniversary ? anniversary.id : null
+  const creator = getActiveCreators().find((c) => c.id === currentAnniversaryCreatorId)
+
+  $('anniversaryFormTitle').textContent = anniversary ? '記念日を編集' : '記念日を追加'
+  $('anniversaryFormSub').textContent = creator ? `${creator.name} さんの記念日` : ''
+  $('anniversaryFormError').textContent = ''
+  $('anniversaryLabelInput').value = anniversary ? anniversary.label : ''
+  $('anniversaryMonthInput').value = anniversary ? anniversary.month : ''
+  $('anniversaryDayInput').value = anniversary ? anniversary.day : ''
+  $('anniversaryNotifyInput').value = anniversary ? anniversary.notifyDaysBefore : 7
+  $('anniversaryNoteInput').value = anniversary ? (anniversary.note || '') : ''
+
+  closeModal(anniversaryListModal)
+  openModal(anniversaryFormModal)
+  setTimeout(() => $('anniversaryLabelInput').focus(), 100)
+}
+
+$('anniversaryFormSaveBtn').addEventListener('click', () => {
+  if (!currentAnniversaryCreatorId) return
+  const errorEl = $('anniversaryFormError')
+  errorEl.textContent = ''
+
+  const label = $('anniversaryLabelInput').value.trim()
+  const month = parseInt($('anniversaryMonthInput').value, 10)
+  const day = parseInt($('anniversaryDayInput').value, 10)
+  const notifyDaysBefore = parseInt($('anniversaryNotifyInput').value, 10)
+  const note = $('anniversaryNoteInput').value.trim()
+
+  if (!label) {
+    errorEl.textContent = '記念日名を入力してください'
+    return
+  }
+  if (!isValidMonthDay(month, day)) {
+    errorEl.textContent = '月日が正しくありません'
+    return
+  }
+  if (!Number.isInteger(notifyDaysBefore) || notifyDaysBefore < 0) {
+    errorEl.textContent = '事前表示日数が正しくありません'
+    return
+  }
+
+  const payload = { label, month, day, notifyDaysBefore, note: note || undefined }
+  const result = currentEditingAnniversaryId
+    ? updateAnniversary(currentEditingAnniversaryId, payload)
+    : addAnniversary(currentAnniversaryCreatorId, payload)
+
+  if (!result) {
+    errorEl.textContent = '保存に失敗しました。入力内容を確認してください'
+    return
+  }
+
+  currentEditingAnniversaryId = null
+  closeModal(anniversaryFormModal)
+  const creator = getActiveCreators().find((c) => c.id === currentAnniversaryCreatorId)
+  if (creator) openAnniversaryListModal(creator)
+  render()
+})
+
+$('anniversaryFormCancelBtn').addEventListener('click', () => {
+  currentEditingAnniversaryId = null
+  closeModal(anniversaryFormModal)
+  const creator = getActiveCreators().find((c) => c.id === currentAnniversaryCreatorId)
+  if (creator) openAnniversaryListModal(creator)
 })
 
 // --- Settings ---
@@ -948,6 +1181,13 @@ document.querySelectorAll('[data-sort-section]').forEach((btn) => {
 $('sortCloseBtn').addEventListener('click', () => {
   currentSortSection = null
   closeModal(sortModal)
+})
+
+// --- Anniversary filter ---
+
+anniversaryFilterBtn.addEventListener('click', () => {
+  anniversaryFilterEnabled = !anniversaryFilterEnabled
+  render()
 })
 
 // --- Version update notice ---

@@ -52,6 +52,11 @@
         <p id="naviLine" class="navi-line"></p>
       </section>
 
+      <!-- Anniversary filter toggle -->
+      <button class="anniv-filter-btn" id="anniversaryFilterBtn" type="button" aria-pressed="false" hidden>
+        記念日が登録済みの人だけ表示
+      </button>
+
       <!-- lv1 Section -->
       <section class="section" id="lv1Section">
         <h2 class="section-title">
@@ -166,6 +171,10 @@
             <span class="action-btn-label">名前を変更</span>
             <span class="action-btn-desc">表示名を編集</span>
           </button>
+          <button class="action-btn" id="actionAnniversaryBtn">
+            <span class="action-btn-label">記念日</span>
+            <span class="action-btn-desc">誕生日・活動開始日などを登録</span>
+          </button>
           <button class="action-btn action-btn--danger" id="actionArchiveBtn">
             <span class="action-btn-label">アーカイブ</span>
             <span class="action-btn-desc">一時的に非表示</span>
@@ -173,6 +182,62 @@
         </div>
         <div class="modal-actions">
           <button class="btn btn-secondary" id="actionMenuCloseBtn">閉じる</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Anniversary List Modal -->
+    <div class="modal-overlay" id="anniversaryListModal">
+      <div class="modal">
+        <div class="modal-creator-info" id="anniversaryListCreatorInfo"></div>
+        <div class="modal-label-row">
+          <span class="modal-label">記念日</span>
+        </div>
+        <div id="anniversaryList" class="anniversary-list"></div>
+        <button class="btn-add-anniversary" id="anniversaryAddBtn">＋ 記念日を追加</button>
+        <div class="modal-actions">
+          <button class="btn btn-secondary btn-full" id="anniversaryListCloseBtn">閉じる</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Anniversary Form Modal (add/edit) -->
+    <div class="modal-overlay modal-overlay--top" id="anniversaryFormModal">
+      <div class="modal modal--top">
+        <h2 class="modal-title" id="anniversaryFormTitle">記念日を追加</h2>
+        <p class="modal-sub" id="anniversaryFormSub"></p>
+
+        <div class="modal-field">
+          <label class="modal-label" for="anniversaryLabelInput">記念日名</label>
+          <input type="text" id="anniversaryLabelInput" class="modal-input" placeholder="誕生日" />
+        </div>
+
+        <div class="modal-input-row">
+          <div class="modal-input-col">
+            <label class="modal-label" for="anniversaryMonthInput">月</label>
+            <input type="number" id="anniversaryMonthInput" class="modal-input" min="1" max="12" inputmode="numeric" />
+          </div>
+          <div class="modal-input-col">
+            <label class="modal-label" for="anniversaryDayInput">日</label>
+            <input type="number" id="anniversaryDayInput" class="modal-input" min="1" max="31" inputmode="numeric" />
+          </div>
+        </div>
+
+        <div class="modal-field">
+          <label class="modal-label" for="anniversaryNotifyInput">何日前から表示するか</label>
+          <input type="number" id="anniversaryNotifyInput" class="modal-input" min="0" inputmode="numeric" value="7" />
+        </div>
+
+        <div class="modal-field">
+          <label class="modal-label" for="anniversaryNoteInput">メモ（任意）</label>
+          <input type="text" id="anniversaryNoteInput" class="modal-input" placeholder="去年見逃した反省、など" />
+        </div>
+
+        <p class="modal-error" id="anniversaryFormError"></p>
+
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="anniversaryFormSaveBtn">保存</button>
+          <button class="btn btn-secondary" id="anniversaryFormCancelBtn">キャンセル</button>
         </div>
       </div>
     </div>
